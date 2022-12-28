@@ -1,6 +1,8 @@
 from options import *
 from svgwrite.drawing import Drawing
+from collections.abc import Iterable
 
+import sys
 import os
 
 from tkinter import *
@@ -8,6 +10,8 @@ from tkinter import *
 from svglib.svglib import svg2rlg
 from reportlab.graphics import renderPDF, renderPM
 from PIL import Image, ImageTk
+
+from maths.helpers import stopPrint 
 
 class Diagram:
     def __init__(self, **kwargs):
@@ -17,11 +21,21 @@ class Diagram:
         self.drawing = Drawing('result.svg', size=size)
         self.drawing.add(self.drawing.rect(insert=(0, 0), size=('100%', '100%'), rx=None, ry=None, fill=BACKGROUND))
 
+
     def save(self, **kwargs):
         name = kwargs.get('name', "result.svg")
         if name[-4:] != ".svg": name = name + ".svg"
         path = kwargs.get('path', "")
         self.drawing.saveas(path + name)
+
+
+    def draw(self, *args):
+        for arg in args:
+            if arg is None: continue
+            if (isinstance(arg, Iterable)):
+                for comp in arg: self.draw(comp)
+            else: arg.draw(self)
+
 
     def display(self, **kwargs):
         self.save()
