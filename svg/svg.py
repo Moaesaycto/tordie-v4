@@ -1,4 +1,4 @@
-from options import *
+from settings import *
 from svgwrite.drawing import Drawing
 from collections.abc import Iterable
 
@@ -14,19 +14,19 @@ from PIL import Image, ImageTk
 from maths.helpers import stopPrint 
 
 class Diagram:
-    def __init__(self, **kwargs):
-        self.width, self.height = kwargs.get("width", DEFAULT_WIDTH), kwargs.get("height", DEFAULT_HEIGHT)
+    def __init__(self, width=DEFAULT_WIDTH, height=DEFAULT_HEIGHT, name="result.svg"):
+        self.width, self.height = width, height
         size = (f"{str(self.width + BOUNDS_FIX)}px", f"{str(self.height  + BOUNDS_FIX)}px")
-    
+        self.name = name
         self.drawing = Drawing('result.svg', size=size)
         self.drawing.add(self.drawing.rect(insert=(0, 0), size=('100%', '100%'), rx=None, ry=None, fill=BACKGROUND))
 
+    def set_name(self, name):
+        self.name = name
 
-    def save(self, **kwargs):
-        name = kwargs.get('name', "result.svg")
-        if name[-4:] != ".svg": name = name + ".svg"
-        path = kwargs.get('path', "")
-        self.drawing.saveas(path + name)
+    def save(self, directory=""):
+        if self.name[-4:] != ".svg": self.name = self.name + ".svg"
+        self.drawing.saveas(directory + self.name)
 
 
     def draw(self, *args):
@@ -37,9 +37,8 @@ class Diagram:
             else: arg.draw(self)
 
 
-    def display(self, **kwargs):
+    def display(self, name="temp.png"):
         self.save()
-        name = kwargs.get('name', "temp.png")
         if name[-4:] != ".png": name += ".png"
 
         root = Tk()

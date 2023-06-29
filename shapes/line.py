@@ -1,13 +1,14 @@
 from abc import ABC, abstractmethod
 from svgwrite.drawing import Drawing
 from svgwrite import shapes
-from options import *
+from settings import *
 from shapes.point import Point
 from copy import deepcopy
 from utils import color
 from shapes.shape import Shape
 from shapes.circle import Circle
 from numpy import sqrt
+
 
 class Line(Shape):
     def __init__(self, point1, point2, **kwargs):
@@ -17,10 +18,22 @@ class Line(Shape):
         self.start, self.end = point1, point2
 
     @abstractmethod
-    def draw(self, svg: Drawing): pass
-
-    @abstractmethod
     def reflect(self, point: Point): pass
+    
+    @abstractmethod
+    def conformal(self, f): pass
+
+    def translate(self, vector):
+        self.start.translate(vector)
+        self.end.translate(vector)
+
+    def rotate(self, angle, *args): 
+        self.start.rotate(angle, *args)
+        self.end.rotate(angle, *args)
+
+    def scale(self, scale, *args):
+        self.start.scale(scale, *args)
+        self.end.scale(scale, *args)
 
 
 class EuclideanLine(Line):
@@ -45,6 +58,12 @@ class EuclideanLine(Line):
             new_point.set_cartesian(2*r-point.x, 2*(-1/m*(r - point.x)) + point.y)
             
         return new_point
+    
+    def conformal(self, f):
+        result = deepcopy(self)
+        result.start = f(self.start)
+        result.end = f(self.end)
+        return result
 
 
 class PoincareLine(Line):
@@ -96,3 +115,6 @@ class PoincareLine(Line):
 
     def reflect(self, point):
         return self.circle.reflect(point)
+
+    def conformal(self, f):
+        pass

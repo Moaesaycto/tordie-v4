@@ -1,2 +1,2 @@
-# tordie-v4
-Tordie V4 with OOP Structure
+# Tordie - Version 4
+Refer to documentation site for more information: _Coming soon..._

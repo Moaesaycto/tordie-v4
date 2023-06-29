@@ -7,7 +7,7 @@ from shapes.parametric import Parametric
 import numpy as np
 
 from math import pi
-from options import *
+from settings import *
 
 def square_grid(N):
     lines = [Parametric(lambda t: t, lambda t: i/N, -SCALE[0]*0.8, SCALE[0]*0.8) for i in range(-N, N+1)]

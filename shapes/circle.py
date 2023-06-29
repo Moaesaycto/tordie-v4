@@ -2,7 +2,7 @@ from svgwrite.drawing import Drawing
 from shapes.shape import Shape
 from copy import deepcopy
 
-from options import *
+from settings import *
 
 class Circle(Shape):
     def __init__(self, center, radius, **kwargs):
