@@ -1,13 +1,10 @@
-from shapes.point import Point
+from shapes import Point
 import numpy as np
 from settings import *
 import sys
 import os
-from math import sin, cos, asin, sqrt, pi
-
-def dist(point0, point1): return ((point1.x - point0.x)**2 + (point1.y - point0.y)**2)**(1/2)
-
-def diff(fx, t): return (fx(t + DIFF_STEP) - fx(t))/DIFF_STEP
+from functools import cache
+from math import sin, cos, cosh, sinh, sqrt, pi
 
 def stopPrint(func, *args, **kwargs):
     with open(os.devnull, "w") as devNull:
@@ -36,3 +33,20 @@ def rad_poly_star_lambda(n, m, k):
     nom = lambda t: np.cos((2*np.arcsin(k)+pi*m)/(2*n))
     denom = lambda t: np.cos((2*np.arcsin(k*np.cos(n*t.y))+pi*m)/(2*n))
     return lambda t: nom(t)/denom(t)
+
+def sin(self): return Point(sin(self.x) * cosh(self.y), cos(self.x) * sinh(self.y))
+
+def cos(self): return Point(cos(self.x) * cosh(self.y), -sin(self.x) * sinh(self.y))
+
+@cache
+def betaF(n, m):
+    nnn = 2**(n+1) - 1
+    if m == 0: return 1.0
+    if n > 0 and m < nnn: return 0
+    else: return (betaF(n+1, m) - sum([betaF(n, k)*betaF(n, m-k) for k in range(nnn, m-nnn+1)]) - betaF(0, m-nnn))/2
+
+def unit_circle_to_mandelbrot(N):
+    def Psi_M(w):
+        if w == 0: return 0
+        return w + sum(betaF(0, j+1)/(w**j) for j in range(N))
+    return lambda w: Psi_M(w)

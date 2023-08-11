@@ -11,7 +11,7 @@ from svglib.svglib import svg2rlg
 from reportlab.graphics import renderPDF, renderPM
 from PIL import Image, ImageTk
 
-from maths.helpers import stopPrint 
+from helpers import stopPrint 
 
 class Diagram:
     def __init__(self, width=DEFAULT_WIDTH, height=DEFAULT_HEIGHT, name="result.svg"):

@@ -1,7 +1,7 @@
 from copy import deepcopy
 from svgpathtools import svg2paths
-from shapes.line import EuclideanLine as Line
-from shapes.point import Point
+from shapes import EuclideanLine as Line
+from shapes import Point
 from settings import SCALE
 import re
 

@@ -1,6 +1,6 @@
 #   Default settings for drawn objects
 DEFAULT_STROKE = "black"
-DEFAULT_RADIUS = 3
+DEFAULT_RADIUS = 2
 DEFAULT_THICKNESS = 2
 
 # SVG settings 
@@ -12,10 +12,10 @@ DISPLAY_WIDTH = 1000
 DISPLAY_HEIGHT = 1000
 
 # Mathematical Settings
-SCALE = (10, 10)
+SCALE = (5, 5)
 
 # Parametric curve settings
-DEFAULT_STEP = 200
+DEFAULT_STEP = 800
 
 # Advanced settings
 POINCARE_ERR = 0.001
