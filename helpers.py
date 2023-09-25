@@ -50,3 +50,12 @@ def unit_circle_to_mandelbrot(N):
         if w == 0: return 0
         return w + sum(betaF(0, j+1)/(w**j) for j in range(N))
     return lambda w: Psi_M(w)
+
+def flatten_list(input_list):
+    result = []
+    for item in input_list:
+        if isinstance(item, list):
+            result.extend(flatten_list(item))
+        else:
+            result.append(item)
+    return result

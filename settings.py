@@ -12,7 +12,7 @@ DISPLAY_WIDTH = 1000
 DISPLAY_HEIGHT = 1000
 
 # Mathematical Settings
-SCALE = (5, 5)
+SCALE = (10, 10)
 
 # Parametric curve settings
 DEFAULT_STEP = 800

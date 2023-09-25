@@ -8,11 +8,14 @@ from numpy import sqrt
 from svgwrite import shapes
 from copy import deepcopy
 from settings import *
+from scipy.integrate import cumtrapz
+from scipy.interpolate import interp1d
 
 class Shape(ABC):
-    def __init__(self, width=DEFAULT_THICKNESS, stroke=DEFAULT_STROKE):
+    def __init__(self, width=DEFAULT_THICKNESS, stroke=DEFAULT_STROKE, **kwargs):
         self.width = width
         self.stroke = stroke
+        self.kwargs = kwargs
     
     @abstractmethod
     def draw(svg): pass
@@ -48,6 +51,8 @@ class Point(Shape):
         else:
             self.x, self.y = coord1, coord2
             self.r, self.theta = sqrt(coord1**2 + coord2**2), atan2(self.y, self.x)
+        
+        self.theta360 = self.theta if self.theta >= 0 else 2*pi + self.theta
 
     def __eq__(self, other):
         return isinstance(other, Point) and self.x == other.x and self.y == other.y
@@ -144,7 +149,7 @@ class Line(Shape):
     def __init__(self, point1, point2, **kwargs):
         self.thickness = kwargs.get("thickness", DEFAULT_THICKNESS)
         self.stroke = kwargs.get("stroke", DEFAULT_STROKE)
-
+        super().__init__(**kwargs)
         self.start, self.end = point1, point2
 
     @abstractmethod
@@ -446,7 +451,6 @@ class Parametric(Line):
             i += (tn - t0)/h
         if i != tn: self.points[i] = Point(fx(tn), fy(tn))
 
-
     def draw(self, svg: Drawing):
         adjusted_points = [point.adjust(svg.width, svg.height, SCALE) for point in self.points.values()]
         result = svg.drawing.add(shapes.Polyline(adjusted_points, stroke_width=self.thickness,stroke=self.stroke))
@@ -468,7 +472,6 @@ class Parametric(Line):
         c = Point((-b1*c2 + c1*b2)/(a1*b2 - b1*a2), (a1*c2 - c1*a2)/(a1*b2 - b1*a2))
         return Circle(c, dist(c, over_point)).reflect(point)
 
-
     def get_reflect_point(self, point: Point):
         current = None
         for p in self.points.values():
@@ -481,7 +484,6 @@ class Parametric(Line):
                     current = p
         return current
     
-
     def para_reflect(self, parametric):
         reflection = deepcopy(parametric)
         reflection.points = {}
@@ -489,7 +491,6 @@ class Parametric(Line):
             tempPoint = self.reflect(parametric.points[t])
             if tempPoint is not None: reflection.points[t] = tempPoint
         return reflection
-
 
     def conformal(self, f):
         result = deepcopy(self)
@@ -534,7 +535,21 @@ class Parametric(Line):
             intersection_points += curr_line.intersect_circle(circle)
 
         return intersection_points
+    
+    def reparameterize_unit_speed(self, steps=DEFAULT_STEP):
+        lambda_x, lambda_y, t_values = self.fx, self.fy, np.linspace(self.t0, self.tn, steps)
+        x_values, y_values = [lambda_x(t) for t in t_values], [lambda_y(t) for t in t_values]
 
+        dxdt, dydt = np.gradient(x_values, t_values), np.gradient(y_values, t_values)
+        arc_length = cumtrapz(np.sqrt(dxdt**2 + dydt**2), initial=0)
+
+        t_spline = interp1d(arc_length, t_values, kind='cubic', fill_value="extrapolate")
+
+        return Parametric(lambda t: lambda_x(t_spline(t)), lambda t: lambda_y(t_spline(t)), 0, arc_length[-1], step=steps, **self.kwargs)
+
+    def f(self, t):
+        if t < self.t0 or t > self.tn: raise ValueError("t must be between t0 and tn")
+        return Point(self.fx(t), self.fy(t))
 
 class Polygon(Shape):
     def __init__(self, points, parametric=False, m=0, center=None, m_center="relative", show_points=False, **kwargs):
