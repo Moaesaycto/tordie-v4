@@ -1,8 +1,6 @@
 from copy import deepcopy
-from svgpathtools import svg2paths
 from shapes import EuclideanLine as Line
 from shapes import Point, Parametric
-from helpers import flatten_list
 from settings import SCALE
 import re
 # requires svg.path, install it like this: pip3 install svg.path
@@ -18,7 +16,9 @@ from math import floor, pi
 from helpers import  exp
 
 class ImportedSVG():
-    def __init__(self, path, pivot=Point(0,0), rel_scale="auto"):
+    def __init__(self, path, pivot=Point(0,0), rel_scale="auto", euclidean=True):
+        self.mapping_eligible = True
+        self.euclidean = euclidean
         self.path = path
         self.pivot, self.rel_scale = pivot, rel_scale
         if self.rel_scale != "auto":
@@ -36,6 +36,8 @@ class ImportedSVG():
         doc = minidom.parse(self.path)
         path_strings = [path.getAttribute('d') for path in doc.getElementsByTagName('path')]
         doc.unlink()
+
+        if len(path_strings) > 1 or path_strings[-1][-1] not in "zZ": self.mapping_eligible = False
 
         abs_paths = []
         for path_string in path_strings:
@@ -56,7 +58,11 @@ class ImportedSVG():
                       0, 1))
 
             elif isinstance(path, SVGLine) or (isinstance(path, Close) and isinstance(abs_paths[i-1], SVGLine)):
-                self.lines.append(Parametric(
+                if self.euclidean: self.lines.append(Line(
+                    (Point(path.start.real, -path.start.imag) - center)*scale[0] + pivot.x, 
+                    (Point(path.end.real, -path.end.imag) - center)*scale[1] + pivot.y
+                ))
+                else: self.lines.append(Parametric(
                     (Point(path.start.real, -path.start.imag) - center)*scale[0] + pivot.x, 
                     (Point(path.end.real, -path.end.imag) - center)*scale[1] + pivot.y
                 ))

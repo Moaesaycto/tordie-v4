@@ -24,11 +24,11 @@ from helpers import  exp
 from math import exp as e # Built in maths class
 from math import floor, pi
 
-
 if __name__ == '__main__':
     init(short=False)
     drawing = Diagram()
-    imported = ImportedSVG('input.svg')
-    drawing.draw(imported)
+    imported = ImportedSVG('input.svg', rel_scale="(1u,1u)")
+    ori = MiuraOri(4, 24, v_height=2*pi, h_width=2*pi, parametric_verts=True, top=False, squash_factor=1, start=P(2, -pi))
+    ori = ori.conformal(imported.generate_circular_mapping())
+    drawing.draw(ori)
     drawing.display()
-
